@@ -1113,6 +1113,9 @@ function parameters.init()
   params:add_group("w/tape",17)
   w_slash.wtape_add_params()
 
+  -- Append to preserve the existing mod-matrix parameter ordering.
+  clouds.add_params()
+
 
 end
 

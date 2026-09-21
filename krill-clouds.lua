@@ -1,5 +1,6 @@
--- krill v1.0.3 @jaseknighter
--- chaotic sequencer, MI Rings engine, and mod matrix
+-- krill-clouds v1.1.0
+-- based on krill v1.0.3 @jaseknighter
+-- chaotic sequencer, MI Rings into Clouds, and mod matrix
 --
 -- llllllll.co/t/54975
 --
@@ -37,7 +38,7 @@
 --   
 
 
-engine.name="Krill"
+engine.name="KrillClouds"
 
 MusicUtil = require "musicutil"
 tabutil = require "tabutil"
@@ -51,6 +52,7 @@ Sequins = require "sequins"
 encoders_and_keys = include("lib/encoders_and_keys")
 globals = include("lib/globals")
 lorenz = include("lib/lorenz")
+clouds = include("lib/clouds")
 parameters = include("lib/parameters")
 midi_helper = include("lib/midi_helper")
 sound_controller = include("lib/sound_controller")

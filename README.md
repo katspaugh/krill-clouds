@@ -1,35 +1,100 @@
-<img src="https://raw.githubusercontent.com/jaseknighter/krill/main/images/1-1-0-start.png" />
+# Krill Clouds
 
-# krill
+A fork of [jaseknighter's Krill](https://github.com/jaseknighter/krill) that adds
+Mutable Instruments Clouds after Rings:
 
-a [Lorenz system](https://en.wikipedia.org/wiki/Lorenz_system) sequencer and mod matrix running @okyeron's UGen linux port of Mutable Instruments Rings for monome norns.
+**Krill's generative sequencer → Rings → Clouds → stereo output**
 
-## requirements
+Choose Krill's **vuja de** sequencer for Marbles-inspired looping variation, or
+**krell** for envelope-driven sequencing. Clouds adds grains, pitch shifting,
+freeze, feedback, stereo spread and reverb. It is the real `MiClouds` port, with
+all four playback modes, rather than an approximation built from other effects.
 
-* norns (required)
-* crow, W/, Just Friends, midi (optional)
-* audio input to excite the MIRings engine (optional)
+## Install
 
-## installation
+1. In Maiden's **matron** REPL, enter:
 
-the install process requires three steps to properly install:
+   ```text
+   ;install https://github.com/katspaugh/krill-clouds
+   ```
 
-1. open maiden and below the "matron" tab, enter:
+2. Both **MiRings** and **MiClouds** SuperCollider plugins must be installed.
+   If you installed the full MI-UGens pack, you may already have both. Otherwise,
+   on a standard 32-bit Norns image, run in the same matron REPL:
 
-    `;install https://github.com/jaseknighter/krill`
+   ```lua
+   os.execute("sh /home/we/dust/code/krill-clouds/install-mi-ugens.sh")
+   ```
 
-2. in the same "matron" tab install the MIRings UGen with this command:
+   The installer checks a pinned archive's checksum and copies only the missing
+   Rings/Clouds plugins into your user Extensions folder. Existing complete
+   installations are kept. Custom 64-bit images need matching plugin builds;
+   this installer will stop rather than install incompatible binaries.
 
-```
-os.execute("wget -T 180 -q -P /tmp/ https://github.com/okyeron/mi-UGens/raw/master/linux-norns-binaries/mi-UGens-linux-v.03.tar && tar -xvf /tmp/mi-UGens-linux-v.03.tar -C /tmp && cp -r /tmp/mi-UGens-linux-v.03/* /home/we/.local/share/SuperCollider/Extensions/ && rm -r /tmp/mi-UGens-linux-v.03 && rm -r /tmp/mi-UGens-linux-v.03.tar")
-```
-   
+3. Restart Norns and select **KRILL-CLOUDS**.
 
-note: you may skip step 2 above if you previously installed the MIRings UGen with either @okyeron's [MI-UGens for Norns](https://llllllll.co/t/mi-ugens-for-norns/31781) or the resonator pedal that is part of @21echoes' [Pedalboard](https://llllllll.co/t/pedalboard-chainable-fx-for-norns/31119).
+Original Krill can stay installed. This fork has its own `KrillClouds` engine,
+SynthDef and script data directory. No grid, crow or external audio source is
+required; Krill's optional external connections are still available.
 
-3. restart your norns.
+## Play
 
-  
+Turn **E1** to the new **cld** page, **E2** to select a parameter, and **E3** to
+change it. All controls also appear under **PARAMETERS → EDIT → CLOUDS** and in
+the modulation matrix. Clouds starts in granular mode at 35% wet.
+
+For the Marbles/Rings/Clouds idea, select **seq → seq mode → vuja de**, keep a
+short loop, then adjust Krill's loop probability. On **cld**, try mix around
+0.4–0.6, density around 0.3, and a little feedback. Turn freeze on after a phrase
+has played to hold the captured buffer, then explore position and pitch.
+
+| Control | Function |
+| --- | --- |
+| cld on | Enables the wet mix; off selects the dry mix. |
+| cld mix | Dry/wet balance, 0–1. |
+| cld pos | Position in the recorded buffer, 0–1. |
+| cld size | Grain size, 0–1. |
+| cld dens | Density; below 0.5 gives regular grains, above 0.5 gives random grains. At 0.5 there are no automatic grains. |
+| cld tex | Grain texture/window shape, 0–1. |
+| cld pitch | Grain transposition, −48 to +48 semitones. |
+| cld spread | Stereo spread, 0–1. |
+| cld fb | Feedback, 0–1. |
+| cld rvb | Clouds reverb, 0–1. |
+| cld gain | Processor input gain, 0.125–8× (also affects its dry signal). |
+| cld freeze | Hold the captured audio; behavior differs in spectral mode. |
+| cld mode | Grain, stretch, looping delay or spectral. |
+| cld lofi | Lower fidelity with a longer buffer; switching clears the buffer. |
+
+Clouds follows Krill's amplitude envelope, so grain/reverb tails and frozen audio
+can continue after a note ends. Continuous controls are smoothed, and a final
+limiter bounds the output. Turning `cld on` off keeps the processor running and
+recording so it can return smoothly; it does not save CPU.
+
+Use **K1+E1** for the modulation matrix. Clouds parameters have a `cld` prefix in
+the destination list; try an LFO or Lorenz output into `cld pos`, `cld size` or
+`cld tex`. The existing matrix behavior and scaling are inherited from Krill.
+Save a **named KRILL DATA preset** to retain both parameter values and matrix
+patches. Upstream Krill's autosave stores matrix data only. Presets from the
+original script are not imported automatically.
+
+## Validation and limits
+
+Lua integration and offline audio tests passed, including parameter saving,
+modulation, all four Clouds modes, dry bypass and freeze sustain. See
+[test/README.md](test/README.md) for details and repeatable checks.
+**This has not yet been tested on physical Norns hardware.** Spectral mode can
+cause CPU peaks; start with granular mode when checking your device.
+
+The audio routing uses a mono sum of the optional external input to excite one
+stereo Rings instance, followed by one stereo Clouds instance. This avoids
+upstream's accidental nested multichannel expansion and duplicated outputs.
+
+Built on Krill by Jonathan Snyder (@jaseknighter), Émilie Gillet's Mutable
+Instruments algorithms, Volker Böhm's SuperCollider ports and @okyeron's Norns
+builds. Original credits and Krill documentation follow.
+
+---
+
 ## about the script
 the idea for the script and its name came from @mattallison and is inspired by [Todd Barton's Krell patch](https://vimeo.com/48382205). this script's use of a chaotic Lorenz system algorithm differentiates it from the classic Krell patch. in theory at least, using chaos instead of randomness produces patterns that reside in a space between the random and the predictable. 
 
@@ -91,13 +156,14 @@ alternatively, to make grid overlay and UI controls section always visible every
 #### sequencer menus
 <img src="https://raw.githubusercontent.com/jaseknighter/krill/main/images/1-2-1-menus.png" width="500" />
 
-five menus are available from the sequencer view:
+six menus are available from the sequencer view:
 
 * *seq* (sequencer controls)
 * *scr* (Lorenz system visualization controls)
 * *lrz* (Lorenz system algorithm controls)
 * *lfo* (lfo controls)
 * *eng* (MI Rings SuperCollider engine controls)
+* *cld* (MI Clouds processor controls)
 
 use e1 to switch between sequencer menus. 
 

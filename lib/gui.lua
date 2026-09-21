@@ -46,6 +46,7 @@ function gui.setup_menu_maps()
     lrz_params,
     lfo_params,
     eng_params,
+    clouds.param_ids,
   }
 
   local vjd_seq_options = {"sequencing_mode","env_active","env_scalar","rise_time","fall_time","env_max_level","env_shape","num_octaves","loop_length","vuja_de_prob"}
@@ -59,9 +60,10 @@ function gui.setup_menu_maps()
     lrz_params,
     lfo_params,
     eng_params,
+    clouds.param_ids,
   }
 
-  menu_map = {"seq","scr","lrz","lfo","eng"}
+  menu_map = {"seq","scr","lrz","lfo","eng","cld"}
   if sequencing_mode == 1 then
     sub_menu_map = gui.sub_menu_map_krell
   else
@@ -92,7 +94,7 @@ function gui.init()
 
   active_menu = 1
   -- active_sub_menu = {1,1,1,1}
-  active_sub_menu = {1,1,1,1,1}
+  active_sub_menu = {1,1,1,1,1,1}
   active_sub_menu_label = ""
   active_sub_menu_value = ""
 

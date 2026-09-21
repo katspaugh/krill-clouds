@@ -1,10 +1,10 @@
-// Engine_Krill
+// Engine_KrillClouds
 // Implementation of  @okyeron's MiRings UGen port for norns 
 // Jonathan Snyder @jaseknighter
 //
 // Mi-Ugens by volker böhm, 2020 - https://vboehm.net
 
-Engine_Krill : CroneEngine {
+Engine_KrillClouds : CroneEngine {
 	// <Krill>
 	var krillVoice;
 	var envPosPoll,envPosPollFunc;
@@ -32,7 +32,7 @@ Engine_Krill : CroneEngine {
 
 	alloc {
 
-		SynthDef(\KrillSynth,{ 
+		SynthDef(\KrillCloudsSynth,{
       arg outBus=0, logExp=0.5,loop=1,plugged=0,
 			out,
 			hz=220,amp=0.5, 
@@ -50,7 +50,12 @@ Engine_Krill : CroneEngine {
 			rise_phase=0, 
 			rings_pos=0.05,rings_easter_egg=0, rings_poly=1,
 			rings_structure_min=0.2,rings_structure_max=0.2,
-			rings_brightness_min=0.01,rings_brightness_max=0.01, rings_damping_min=0.5,rings_damping_max=0.5;
+			rings_brightness_min=0.01,rings_brightness_max=0.01, rings_damping_min=0.5,rings_damping_max=0.5,
+			// Clouds processes the enveloped Rings output, so frozen grains and tails persist.
+			clouds_enabled=1, clouds_mix=0.35, clouds_position=0.5, clouds_size=0.25,
+			clouds_density=0.35, clouds_texture=0.5, clouds_pitch=0, clouds_spread=0.5,
+			clouds_feedback=0.15, clouds_reverb=0.2, clouds_gain=1,
+			clouds_freeze=0, clouds_mode=0, clouds_lofi=0;
 
 			var osc, env_phase, rise_rate, fall_rate, 
 			env_rate, env_pos, rise_fall_env, rise_fall_env_gen, amp_env_gen, sig, done, env_changed,
@@ -80,7 +85,8 @@ Engine_Krill : CroneEngine {
 			
 			pitch = frequency;
 
-			exciter = (trigger_mode) + SoundIn.ar([0,1],mul:trigger_mode);
+			// A mono exciter feeds one Rings instance, which already returns stereo.
+			exciter = trigger_mode + (Mix(SoundIn.ar([0,1])) * 0.5 * trigger_mode);
 
 			sig = MiRings.ar(
 				in: exciter, trig: trig, 
@@ -111,19 +117,37 @@ Engine_Krill : CroneEngine {
 		  ).tanh/2.7);
       
     
+			sig = MiClouds.ar(
+				inputArray: sig,
+				pit: Lag.kr(clouds_pitch.clip(-48, 48), 0.05),
+				pos: Lag.kr(clouds_position.clip(0, 1), 0.05),
+				size: Lag.kr(clouds_size.clip(0, 1), 0.05),
+				dens: Lag.kr(clouds_density.clip(0, 1), 0.05),
+				tex: Lag.kr(clouds_texture.clip(0, 1), 0.05),
+				drywet: Lag.kr(clouds_mix.clip(0, 1) * clouds_enabled.clip(0, 1), 0.05),
+				in_gain: Lag.kr(clouds_gain.clip(0.125, 8), 0.05),
+				spread: Lag.kr(clouds_spread.clip(0, 1), 0.05),
+				rvb: Lag.kr(clouds_reverb.clip(0, 1), 0.05),
+				fb: Lag.kr(clouds_feedback.clip(0, 1), 0.05),
+				freeze: clouds_freeze.clip(0, 1),
+				mode: clouds_mode.clip(0, 3).round,
+				lofi: clouds_lofi.clip(0, 1)
+			);
+			sig = Limiter.ar(LeakDC.ar(sig), 0.98);
+
 			SendReply.kr(Impulse.kr(50), '/triggerEnvPosPoll', env_pos);
 			SendReply.kr(Impulse.kr(50), '/triggerEnvLevelPoll', rise_fall_env_gen);
 
 			SendReply.kr(env_changed * env_phase, '/triggerRiseDonePoll', env_phase);
 			SendReply.kr(fall_done, '/triggerFallDonePoll', fall_done);
 			// SendReply.kr(fall_done, '/triggerFallDonePoll', retrigger_fall);
-			Out.ar(out, sig.dup);
+			Out.ar(out, sig);
 		}).add;
 		
 
 		context.server.sync;
 		
-		krillVoice = Synth.new(\KrillSynth,[
+		krillVoice = Synth.new(\KrillCloudsSynth,[
 			\out, context.out_b.index,
 			\trig,0, 
 			\gate,0, 
@@ -376,6 +400,19 @@ Engine_Krill : CroneEngine {
 			internal_exciter = msg[1];
 			// krillVoice.set(\internal_exciter,internal_exciter)
 		});
+
+
+		// Every Clouds parameter is available to the Norns modulation matrix.
+		[
+			\clouds_enabled, \clouds_mix, \clouds_position, \clouds_size,
+			\clouds_density, \clouds_texture, \clouds_pitch, \clouds_spread,
+			\clouds_feedback, \clouds_reverb, \clouds_gain, \clouds_freeze,
+			\clouds_mode, \clouds_lofi
+		].do { arg control;
+			this.addCommand(control.asString, "f", { arg msg;
+				krillVoice.set(control, msg[1]);
+			});
+		};
 
 	}
 
