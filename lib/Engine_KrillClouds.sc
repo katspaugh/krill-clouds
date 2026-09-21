@@ -54,7 +54,7 @@ Engine_KrillClouds : CroneEngine {
 			// Clouds processes the enveloped Rings output, so frozen grains and tails persist.
 			clouds_enabled=1, clouds_mix=0.35, clouds_position=0.5, clouds_size=0.25,
 			clouds_density=0.35, clouds_texture=0.5, clouds_pitch=0, clouds_spread=0.5,
-			clouds_feedback=0.15, clouds_reverb=0.2, clouds_gain=1,
+			clouds_feedback=0.15, clouds_reverb=0, clouds_gain=1,
 			clouds_freeze=0, clouds_mode=0, clouds_lofi=0;
 
 			var osc, env_phase, rise_rate, fall_rate, 

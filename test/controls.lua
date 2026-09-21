@@ -22,6 +22,7 @@ assert(params.group == 0, "Clouds group size is incorrect")
 
 local function near(a, b) assert(math.abs(a-b) < 1e-8, tostring(a) .. " != " .. tostring(b)) end
 near(sent.clouds_mix, 0.35)
+near(sent.clouds_reverb, 0)
 assert(sent.clouds_enabled == 1 and sent.clouds_freeze == 0 and sent.clouds_mode == 0)
 for _, id in ipairs(clouds.param_ids) do assert(sent[id] ~= nil, id .. " default not sent") end
 params:set("clouds_mode", 4)

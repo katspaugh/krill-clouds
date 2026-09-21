@@ -41,7 +41,9 @@ required; Krill's optional external connections are still available.
 
 Turn **E1** to the new **cld** page, **E2** to select a parameter, and **E3** to
 change it. All controls also appear under **PARAMETERS → EDIT → CLOUDS** and in
-the modulation matrix. Clouds starts in granular mode at 35% wet.
+the modulation matrix. Clouds starts in granular mode at 35% wet, with its internal
+reverb off so you can use Norns' system reverb. Increase `cld rvb` if you want
+Clouds' reverb as well.
 
 For the Marbles/Rings/Clouds idea, select **seq → seq mode → vuja de**, keep a
 short loop, then adjust Krill's loop probability. On **cld**, try mix around
@@ -59,7 +61,7 @@ has played to hold the captured buffer, then explore position and pitch.
 | cld pitch | Grain transposition, −48 to +48 semitones. |
 | cld spread | Stereo spread, 0–1. |
 | cld fb | Feedback, 0–1. |
-| cld rvb | Clouds reverb, 0–1. |
+| cld rvb | Clouds reverb, 0–1; defaults to 0 (off). |
 | cld gain | Processor input gain, 0.125–8× (also affects its dry signal). |
 | cld freeze | Hold the captured audio; behavior differs in spectral mode. |
 | cld mode | Grain, stretch, looping delay or spectral. |
@@ -442,4 +444,3 @@ there is a variable in the `globals.lua` file called `AUTOSAVE_DEFAULT`. setting
 * fix issues with functionality, documentation, and usability 
 * set vuja de loop length and probability separately for each pattern
 * publish the mod matrix as a mod that other scripts can use
-
