@@ -18,11 +18,17 @@ end})
 params = ParamSet.new("clouds-test")
 clouds = include("lib/clouds")
 clouds.add_params()
-assert(params.group == 0, "Clouds group size is incorrect")
+assert(params:lookup_param("clouds").n == #clouds.param_ids, "Clouds group size is incorrect")
 
 local function near(a, b) assert(math.abs(a-b) < 1e-8, tostring(a) .. " != " .. tostring(b)) end
 near(sent.clouds_mix, 0.35)
 near(sent.clouds_reverb, 0)
+near(params:get("clouds_density"), -0.3)
+near(sent.clouds_density, 0.35)
+for _, mapping in ipairs({{-1, 0}, {0, 0.5}, {1, 1}, {-0.4, 0.3}}) do
+  params:set("clouds_density", mapping[1])
+  near(sent.clouds_density, mapping[2])
+end
 assert(sent.clouds_enabled == 1 and sent.clouds_freeze == 0 and sent.clouds_mode == 0)
 for _, id in ipairs(clouds.param_ids) do assert(sent[id] ~= nil, id .. " default not sent") end
 params:set("clouds_mode", 4)
@@ -54,6 +60,21 @@ params:read(preset)
 os.remove(preset)
 for id, value in pairs(snapshot) do near(params:get(id), value) end
 assert(sent.clouds_mode == 3 and sent.clouds_freeze == 1)
+
+-- Legacy PSETs retain their sound; new bipolar PSETs are not converted again.
+local legacy = os.tmpname()
+local file = assert(io.open(legacy, "w"))
+file:write('"clouds_density": 0.8\n')
+file:close()
+params:read(legacy)
+near(params:get("clouds_density"), 0.6)
+near(sent.clouds_density, 0.8)
+params:write(legacy)
+params:set("clouds_density", -0.5)
+params:read(legacy)
+near(params:get("clouds_density"), 0.6)
+near(sent.clouds_density, 0.8)
+os.remove(legacy)
 
 -- Exercise actual Krill matrix action wrapping and a modulation patch.
 params:add_control("test_source", "source", controlspec.new(0, 1, "lin", 0, 0))
@@ -103,7 +124,7 @@ w_slash = include("lib/w_slash")
 parameters = include("lib/parameters")
 parameters.init()
 assert(params:lookup_param("clouds").t == params.tGROUP)
-assert(params.group == 0)
+assert(params.group <= 0)
 for _, id in ipairs(clouds.param_ids) do assert(params.lookup[id]) end
 gui.init()
 assert(sub_menu_map[6] == clouds.param_ids)
@@ -125,7 +146,8 @@ for i, id in ipairs(clouds.param_ids) do
     local before = params:get(id)
     enc(3, 1)
     assert(params:get(id) > before, id .. " did not increase with E3")
-    near(sent[id], params:get(id))
+    local expected = id == "clouds_density" and (params:get(id) + 1) / 2 or params:get(id)
+    near(sent[id], expected)
     enc(3, -1)
     near(params:get(id), before)
     k2_active = true

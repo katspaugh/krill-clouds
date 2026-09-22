@@ -26,7 +26,11 @@ function clouds.add_params()
   control("clouds_mix", "cld mix", 0, 1, 0.35)
   control("clouds_position", "cld pos", 0, 1, 0.5)
   control("clouds_size", "cld size", 0, 1, 0.25)
-  control("clouds_density", "cld dens", 0, 1, 0.35)
+  control("clouds_density", "cld dens", -1, 1, -0.3)
+  params:set_action("clouds_density", function(value)
+    -- MiClouds expects 0..1, with no automatic grains at 0.5.
+    engine.clouds_density((value + 1) / 2)
+  end)
   control("clouds_texture", "cld tex", 0, 1, 0.5)
   control("clouds_pitch", "cld pitch", -48, 48, 0, "st")
   control("clouds_spread", "cld spread", 0, 1, 0.5)
@@ -36,6 +40,28 @@ function clouds.add_params()
   option("clouds_freeze", "cld freeze", {"off", "on"}, 1)
   option("clouds_mode", "cld mode", {"grain", "stretch", "loop", "spectral"}, 1)
   option("clouds_lofi", "cld lofi", {"off", "on"}, 1)
+
+  -- Keep older saved sounds intact when reading the former 0..1 control.
+  -- Hidden and appended so existing modulation-matrix indices do not change.
+  params:add_number("clouds_density_version", "density version", 2, 2, 2)
+  params:hide("clouds_density_version")
+  local previous_read = params.action_read
+  params.action_read = function(filename, silent, pset_number)
+    local file = io.open(filename, "r")
+    if file then
+      local density, version
+      for line in file:lines() do
+        local id, value = line:match('^"([^"]+)":%s*(.*)$')
+        if id == "clouds_density" and density == nil then density = tonumber(value) end
+        if id == "clouds_density_version" and version == nil then version = tonumber(value) end
+      end
+      file:close()
+      if density and not version then
+        params:set("clouds_density", util.clamp(density, 0, 1) * 2 - 1, silent)
+      end
+    end
+    if previous_read then previous_read(filename, silent, pset_number) end
+  end
 
   -- Krill does not bang all parameters at startup. Send this group's defaults
   -- explicitly, before the matrix and GUI wrap the parameter actions.

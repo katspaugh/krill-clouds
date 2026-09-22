@@ -47,7 +47,7 @@ Clouds' reverb as well.
 
 For the Marbles/Rings/Clouds idea, select **seq → seq mode → vuja de**, keep a
 short loop, then adjust Krill's loop probability. On **cld**, try mix around
-0.4–0.6, density around 0.3, and a little feedback. Turn freeze on after a phrase
+0.4–0.6, density around −0.4, and a little feedback. Turn freeze on after a phrase
 has played to hold the captured buffer, then explore position and pitch.
 
 | Control | Function |
@@ -56,7 +56,7 @@ has played to hold the captured buffer, then explore position and pitch.
 | cld mix | Dry/wet balance, 0–1. |
 | cld pos | Position in the recorded buffer, 0–1. |
 | cld size | Grain size, 0–1. |
-| cld dens | Density; below 0.5 gives regular grains, above 0.5 gives random grains. At 0.5 there are no automatic grains. |
+| cld dens | Bipolar density, −1 to +1: negative gives regular grains, positive gives random grains, and 0 gives no automatic grains. Defaults to −0.3. |
 | cld tex | Grain texture/window shape, 0–1. |
 | cld pitch | Grain transposition, −48 to +48 semitones. |
 | cld spread | Stereo spread, 0–1. |
@@ -78,6 +78,9 @@ the destination list; try an LFO or Lorenz output into `cld pos`, `cld size` or
 Save a **named KRILL DATA preset** to retain both parameter values and matrix
 patches. Upstream Krill's autosave stores matrix data only. Presets from the
 original script are not imported automatically.
+
+Older Krill Clouds presets with density stored as 0–1 are converted automatically
+when loaded, preserving their sound. Newly saved presets store the bipolar value.
 
 ## Validation and limits
 
