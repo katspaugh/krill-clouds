@@ -23,6 +23,7 @@ assert(params:lookup_param("clouds").n == #clouds.param_ids, "Clouds group size 
 local function near(a, b) assert(math.abs(a-b) < 1e-8, tostring(a) .. " != " .. tostring(b)) end
 near(sent.clouds_mix, 0.35)
 near(sent.clouds_reverb, 0)
+near(sent.clouds_input, 0)
 near(params:get("clouds_density"), -0.3)
 near(sent.clouds_density, 0.35)
 near(params:get("clouds_texture"), 0)

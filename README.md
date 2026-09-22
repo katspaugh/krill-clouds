@@ -5,6 +5,8 @@ Mutable Instruments Clouds after Rings:
 
 **Krill's generative sequencer → Rings → Clouds → stereo output**
 
+The Norns audio input can also feed Clouds directly, mixed with Rings.
+
 Choose Krill's **vuja de** sequencer for Marbles-inspired looping variation, or
 **krell** for envelope-driven sequencing. Clouds adds grains, pitch shifting,
 freeze, feedback, stereo spread and reverb. It is the real `MiClouds` port, with
@@ -66,6 +68,18 @@ has played to hold the captured buffer, then explore position and pitch.
 | cld freeze | Hold the captured audio; behavior differs in spectral mode. |
 | cld mode | Grain, stretch, looping delay or spectral. |
 | cld lofi | Lower fidelity with a longer buffer; switching clears the buffer. |
+| cld mic | Direct Norns input level into Clouds, 0–1; defaults to 0 (off). |
+
+To process your mic alongside Rings, turn up **cld mic** (try 0.5 first). This
+adds the stereo Norns input directly before Clouds, independently of Rings'
+exciter setting and note envelope. `cld mix` then controls dry/wet for both
+sources, and freeze captures their combined audio. Norns' input level affects
+the mic send; `cld gain` affects the combined Rings/mic signal.
+
+The input must already reach Norns' input meters. A USB mic needs separate
+audio routing into Norns; the script does not configure USB devices. This engine
+update requires an audio restart after installation; a full reboot also clears
+any temporary USB mic routing, which must then be reconnected.
 
 Clouds follows Krill's amplitude envelope, so grain/reverb tails and frozen audio
 can continue after a note ends. Continuous controls are smoothed, and a final
@@ -88,12 +102,15 @@ the bipolar values.
 Lua integration and offline audio tests passed, including parameter saving,
 modulation, all four Clouds modes, dry bypass and freeze sustain. See
 [test/README.md](test/README.md) for details and repeatable checks.
-**This has not yet been tested on physical Norns hardware.** Spectral mode can
-cause CPU peaks; start with granular mode when checking your device.
+Basic playback and encoder operation have been confirmed on physical Norns.
+The direct mic addition has been tested offline with synthetic stereo input;
+realtime CPU performance still needs checking. Spectral mode can cause CPU
+peaks; start with granular mode when checking your device.
 
 The audio routing uses a mono sum of the optional external input to excite one
 stereo Rings instance, followed by one stereo Clouds instance. This avoids
 upstream's accidental nested multichannel expansion and duplicated outputs.
+The separate `cld mic` send preserves stereo and bypasses Rings.
 
 Built on Krill by Jonathan Snyder (@jaseknighter), Émilie Gillet's Mutable
 Instruments algorithms, Volker Böhm's SuperCollider ports and @okyeron's Norns

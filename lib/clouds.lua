@@ -6,7 +6,7 @@ clouds.param_ids = {
   "clouds_enabled", "clouds_mix", "clouds_position", "clouds_size",
   "clouds_density", "clouds_texture", "clouds_pitch", "clouds_spread",
   "clouds_feedback", "clouds_reverb", "clouds_gain", "clouds_freeze",
-  "clouds_mode", "clouds_lofi"
+  "clouds_mode", "clouds_lofi", "clouds_input"
 }
 
 function clouds.add_params()
@@ -43,6 +43,7 @@ function clouds.add_params()
   option("clouds_freeze", "cld freeze", {"off", "on"}, 1)
   option("clouds_mode", "cld mode", {"grain", "stretch", "loop", "spectral"}, 1)
   option("clouds_lofi", "cld lofi", {"off", "on"}, 1)
+  control("clouds_input", "cld mic", 0, 1, 0)
 
   -- Keep older saved sounds intact when reading the former 0..1 controls.
   -- Hidden and appended so existing modulation-matrix indices do not change.

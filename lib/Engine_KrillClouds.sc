@@ -55,7 +55,7 @@ Engine_KrillClouds : CroneEngine {
 			clouds_enabled=1, clouds_mix=0.35, clouds_position=0.5, clouds_size=0.25,
 			clouds_density=0.35, clouds_texture=0.5, clouds_pitch=0, clouds_spread=0.5,
 			clouds_feedback=0.15, clouds_reverb=0, clouds_gain=1,
-			clouds_freeze=0, clouds_mode=0, clouds_lofi=0;
+			clouds_freeze=0, clouds_mode=0, clouds_lofi=0, clouds_input=0;
 
 			var osc, env_phase, rise_rate, fall_rate, 
 			env_rate, env_pos, rise_fall_env, rise_fall_env_gen, amp_env_gen, sig, done, env_changed,
@@ -64,7 +64,7 @@ Engine_KrillClouds : CroneEngine {
 			mathsA=0,foc1=0,eor1=0,
       rise_done=0,
 			fall_done=0;
-			var exciter;
+			var exciter, input;
 			var modeNum=1,cosFreq=0.75;
 
 			rise_phase = Sweep.kr(trig, 1);
@@ -86,7 +86,8 @@ Engine_KrillClouds : CroneEngine {
 			pitch = frequency;
 
 			// A mono exciter feeds one Rings instance, which already returns stereo.
-			exciter = trigger_mode + (Mix(SoundIn.ar([0,1])) * 0.5 * trigger_mode);
+			input = SoundIn.ar([0,1]);
+			exciter = trigger_mode + (Mix(input) * 0.5 * trigger_mode);
 
 			sig = MiRings.ar(
 				in: exciter, trig: trig, 
@@ -117,6 +118,8 @@ Engine_KrillClouds : CroneEngine {
 		  ).tanh/2.7);
       
     
+			// Direct stereo input bypasses Rings and its note envelope.
+			sig = sig + (input * Lag.kr(clouds_input.clip(0, 1), 0.05));
 			sig = MiClouds.ar(
 				inputArray: sig,
 				pit: Lag.kr(clouds_pitch.clip(-48, 48), 0.05),
@@ -407,7 +410,7 @@ Engine_KrillClouds : CroneEngine {
 			\clouds_enabled, \clouds_mix, \clouds_position, \clouds_size,
 			\clouds_density, \clouds_texture, \clouds_pitch, \clouds_spread,
 			\clouds_feedback, \clouds_reverb, \clouds_gain, \clouds_freeze,
-			\clouds_mode, \clouds_lofi
+			\clouds_mode, \clouds_lofi, \clouds_input
 		].do { arg control;
 			this.addCommand(control.asString, "f", { arg msg;
 				krillVoice.set(control, msg[1]);

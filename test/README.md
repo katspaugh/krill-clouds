@@ -31,6 +31,8 @@ actual SynthDef for offline rendering through the real MI plugins. It verifies:
 - Non-silent, finite and bounded audio in all four modes, lofi and extreme settings.
 - Bypass matches dry mix, and the wet processor changes the sound.
 - Frozen grains continue after the source is silenced; an unfrozen buffer fades.
+- A synthetic stereo input reaches Clouds independently of Rings, can be muted,
+  mixes with Rings, preserves stereo and can be frozen. No microphone audio is recorded.
 
 The test writes WAVs, a SuperCollider log and `results.json` to the specified
 temporary output folder. It does not open an audio device. It does not exercise
