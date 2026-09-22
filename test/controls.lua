@@ -108,3 +108,54 @@ for _, id in ipairs(clouds.param_ids) do assert(params.lookup[id]) end
 gui.init()
 assert(sub_menu_map[6] == clouds.param_ids)
 print("PASS: full script parameter registration and Clouds page")
+
+-- Exercise the actual encoder handler, not just direct params:set calls.
+include("lib/encoders_and_keys")
+initializing = false
+gui_level = 1
+page = 1
+active_menu = 6
+k1_active = false
+k2_active = false
+for i, id in ipairs(clouds.param_ids) do
+  active_sub_menu[6] = i
+  local param = params:lookup_param(id)
+  if param.t == params.tCONTROL then
+    params:set_raw(id, 0.4)
+    local before = params:get(id)
+    enc(3, 1)
+    assert(params:get(id) > before, id .. " did not increase with E3")
+    near(sent[id], params:get(id))
+    enc(3, -1)
+    near(params:get(id), before)
+    k2_active = true
+    enc(3, 1)
+    near(params:get_raw(id), 0.5)
+    k2_active = false
+    enc(3, 1000)
+    near(params:get(id), param.controlspec.maxval)
+    enc(3, -1000)
+    near(params:get(id), param.controlspec.minval)
+  else
+    params:set(id, 1)
+    enc(3, 1)
+    assert(params:get(id) == 2 and sent[id] == 1, id .. " option did not change")
+    enc(3, -1)
+    assert(params:get(id) == 1 and sent[id] == 0)
+  end
+end
+active_sub_menu[6] = 2
+enc(2, 1)
+assert(active_sub_menu[6] == 3, "E2 must navigate without changing values")
+
+-- Preserve the original encoder increments of stepped controls.
+params:add_control("test_stepped", "stepped", controlspec.new(0, 10, "lin", 0.1, 2))
+sub_menu_map[7] = {"test_stepped"}
+active_sub_menu[7] = 1
+active_menu = 7
+enc(3, 1)
+near(params:get("test_stepped"), 2.1)
+k2_active = true
+enc(3, 1)
+near(params:get("test_stepped"), 3.1)
+print("PASS: E2 navigation, E3 changes every Clouds control, coarse adjustment and bounds")

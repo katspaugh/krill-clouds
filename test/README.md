@@ -17,6 +17,8 @@ python3 test/audio.py /path/to/mi-ugens /tmp/krill-clouds-audio
 The Lua test uses the real Norns parameter classes and Krill modulation/GUI code,
 with hardware APIs stubbed. It covers defaults, ranges, option indexing, PSET
 round trips, a matrix patch, both sequencing menus and full parameter registration.
+It also drives E2/E3 through Krill's real encoder handler for every Clouds control,
+including coarse adjustment, limits and the existing stepped controls.
 
 The audio test requires Linux `sclang`, `scsynth`, NumPy and SciPy. The plugin
 directory must contain both `.sc` classes and compatible compiled `.so` plugins;

@@ -33,10 +33,12 @@ function enc(n, d)
         params:set(param_name,params:get(param_name)+d)
       elseif p_type == 3 then -- control param
         d = k2_active == true and d*10 or d
-        local new_d = params:get(param_name)+(d*param.controlspec.step)
-        -- local new_d = params:get(param_name)+(d*param.controlspec.step)
-        params:set(param_name,new_d)
-        -- print("p_type,new_d",p_type,new_d,d,param.controlspec.step)
+        if param.controlspec.step == 0 then
+          -- Continuous controls use Norns' normalized delta, including log scales.
+          params:delta(param_name,d)
+        else
+          params:set(param_name,params:get(param_name)+(d*param.controlspec.step))
+        end
       elseif p_type == 5 then -- taper param
         d = k2_active == true and d*10 or d
         local new_d
@@ -90,4 +92,3 @@ function key(n,z)
   end
   
 end
-
