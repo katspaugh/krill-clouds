@@ -31,7 +31,10 @@ function clouds.add_params()
     -- MiClouds expects 0..1, with no automatic grains at 0.5.
     engine.clouds_density((value + 1) / 2)
   end)
-  control("clouds_texture", "cld tex", 0, 1, 0.5)
+  control("clouds_texture", "cld tex", -1, 1, 0)
+  params:set_action("clouds_texture", function(value)
+    engine.clouds_texture((value + 1) / 2)
+  end)
   control("clouds_pitch", "cld pitch", -48, 48, 0, "st")
   control("clouds_spread", "cld spread", 0, 1, 0.5)
   control("clouds_feedback", "cld fb", 0, 1, 0.15)
@@ -41,23 +44,26 @@ function clouds.add_params()
   option("clouds_mode", "cld mode", {"grain", "stretch", "loop", "spectral"}, 1)
   option("clouds_lofi", "cld lofi", {"off", "on"}, 1)
 
-  -- Keep older saved sounds intact when reading the former 0..1 control.
+  -- Keep older saved sounds intact when reading the former 0..1 controls.
   -- Hidden and appended so existing modulation-matrix indices do not change.
   params:add_number("clouds_density_version", "density version", 2, 2, 2)
   params:hide("clouds_density_version")
+  params:add_number("clouds_texture_version", "texture version", 2, 2, 2)
+  params:hide("clouds_texture_version")
   local previous_read = params.action_read
   params.action_read = function(filename, silent, pset_number)
     local file = io.open(filename, "r")
     if file then
-      local density, version
+      local values = {}
       for line in file:lines() do
         local id, value = line:match('^"([^"]+)":%s*(.*)$')
-        if id == "clouds_density" and density == nil then density = tonumber(value) end
-        if id == "clouds_density_version" and version == nil then version = tonumber(value) end
+        if id and values[id] == nil then values[id] = tonumber(value) end
       end
       file:close()
-      if density and not version then
-        params:set("clouds_density", util.clamp(density, 0, 1) * 2 - 1, silent)
+      for _, id in ipairs({"clouds_density", "clouds_texture"}) do
+        if values[id] and not values[id .. "_version"] then
+          params:set(id, util.clamp(values[id], 0, 1) * 2 - 1, silent)
+        end
       end
     end
     if previous_read then previous_read(filename, silent, pset_number) end

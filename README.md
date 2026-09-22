@@ -57,7 +57,7 @@ has played to hold the captured buffer, then explore position and pitch.
 | cld pos | Position in the recorded buffer, 0–1. |
 | cld size | Grain size, 0–1. |
 | cld dens | Bipolar density, −1 to +1: negative gives regular grains, positive gives random grains, and 0 gives no automatic grains. Defaults to −0.3. |
-| cld tex | Grain texture/window shape, 0–1. |
+| cld tex | Bipolar grain texture/window shape, −1 to +1; defaults to 0 (center). |
 | cld pitch | Grain transposition, −48 to +48 semitones. |
 | cld spread | Stereo spread, 0–1. |
 | cld fb | Feedback, 0–1. |
@@ -79,8 +79,9 @@ Save a **named KRILL DATA preset** to retain both parameter values and matrix
 patches. Upstream Krill's autosave stores matrix data only. Presets from the
 original script are not imported automatically.
 
-Older Krill Clouds presets with density stored as 0–1 are converted automatically
-when loaded, preserving their sound. Newly saved presets store the bipolar value.
+Older Krill Clouds presets with density or texture stored as 0–1 are converted
+automatically when loaded, preserving their sound. Newly saved presets store
+the bipolar values.
 
 ## Validation and limits
 

@@ -25,9 +25,13 @@ near(sent.clouds_mix, 0.35)
 near(sent.clouds_reverb, 0)
 near(params:get("clouds_density"), -0.3)
 near(sent.clouds_density, 0.35)
+near(params:get("clouds_texture"), 0)
+near(sent.clouds_texture, 0.5)
 for _, mapping in ipairs({{-1, 0}, {0, 0.5}, {1, 1}, {-0.4, 0.3}}) do
-  params:set("clouds_density", mapping[1])
-  near(sent.clouds_density, mapping[2])
+  for _, id in ipairs({"clouds_density", "clouds_texture"}) do
+    params:set(id, mapping[1])
+    near(sent[id], mapping[2])
+  end
 end
 assert(sent.clouds_enabled == 1 and sent.clouds_freeze == 0 and sent.clouds_mode == 0)
 for _, id in ipairs(clouds.param_ids) do assert(sent[id] ~= nil, id .. " default not sent") end
@@ -64,16 +68,31 @@ assert(sent.clouds_mode == 3 and sent.clouds_freeze == 1)
 -- Legacy PSETs retain their sound; new bipolar PSETs are not converted again.
 local legacy = os.tmpname()
 local file = assert(io.open(legacy, "w"))
-file:write('"clouds_density": 0.8\n')
+file:write('"clouds_density": 0.8\n"clouds_texture": 0.25\n')
 file:close()
 params:read(legacy)
 near(params:get("clouds_density"), 0.6)
 near(sent.clouds_density, 0.8)
+near(params:get("clouds_texture"), -0.5)
+near(sent.clouds_texture, 0.25)
 params:write(legacy)
 params:set("clouds_density", -0.5)
+params:set("clouds_texture", 0.4)
 params:read(legacy)
 near(params:get("clouds_density"), 0.6)
 near(sent.clouds_density, 0.8)
+near(params:get("clouds_texture"), -0.5)
+near(sent.clouds_texture, 0.25)
+
+-- Presets saved after the density change still have legacy texture values.
+file = assert(io.open(legacy, "w"))
+file:write('"clouds_density": -0.3\n"clouds_density_version": 2\n"clouds_texture": 0.75\n')
+file:close()
+params:read(legacy)
+near(params:get("clouds_density"), -0.3)
+near(sent.clouds_density, 0.35)
+near(params:get("clouds_texture"), 0.5)
+near(sent.clouds_texture, 0.75)
 os.remove(legacy)
 
 -- Exercise actual Krill matrix action wrapping and a modulation patch.
@@ -146,7 +165,8 @@ for i, id in ipairs(clouds.param_ids) do
     local before = params:get(id)
     enc(3, 1)
     assert(params:get(id) > before, id .. " did not increase with E3")
-    local expected = id == "clouds_density" and (params:get(id) + 1) / 2 or params:get(id)
+    local bipolar = id == "clouds_density" or id == "clouds_texture"
+    local expected = bipolar and (params:get(id) + 1) / 2 or params:get(id)
     near(sent[id], expected)
     enc(3, -1)
     near(params:get(id), before)
